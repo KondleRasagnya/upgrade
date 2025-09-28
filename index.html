@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Concept Map Builder - Full Stack</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4299e1, #48bb78);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .user-details h3 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #2d3748;
+        }
+
+        .user-details p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        .map-info {
+            background: #f7fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .map-info h4 {
+            margin: 0 0 0.5rem 0;
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+
+        .map-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: #4a5568;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section h3 {
+            margin: 0 0 1rem 0;
+            color: #2d3748;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .toolbar-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3182ce;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .templates-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .template-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .template-card:hover {
+            border-color: #4299e1;
+            transform: translateY(-1px);
+        }
+
+        .template-card h4 {
+            margin: 0 0 0.5rem 0;
+            color: #2d3748;
+            font-size: 0.85rem;
+        }
+
+        .template-card p {
+            margin: 0;
+            color: #718096;
+            font-size: 0.75rem;
+        }
+
+        .collaborators {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .collaborator {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .collaborator-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ed8936, #e53e3e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .collaborator-info {
+            flex: 1;
+        }
+
+        .collaborator-info h5 {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #2d3748;
+        }
+
+        .collaborator-info p {
+            margin: 0;
+            font-size: 0.7rem;
+            color: #718096;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #48bb78;
+        }
+
+        .main-content {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #2d3748;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .save-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #48bb78;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 80px);
+            overflow: hidden;
+        }
+
+        .canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: grab;
+        }
+
+        .canvas.dragging {
+            cursor: grabbing;
+        }
+
+        .node {
+            position: absolute;
+            min-width: 140px;
+            max-width: 220px;
+            padding: 1.25rem;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            cursor: move;
+            user-select: none;
+            transition: all 0.2s ease;
+            border: 3px solid;
+            z-index: 10;
+        }
+
+        .node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .node.selected {
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+
+        .node.editing {
+            box-shadow: 0 0 0 3px rgba(237, 137, 54, 0.5);
+        }
+
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .node-content {
+            font-weight: 600;
+            color: #2d3748;
+            word-wrap: break-word;
+            flex: 1;
+        }
+
+        .node-menu {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .node:hover .node-menu {
+            opacity: 1;
+        }
+
+        .node-menu-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            color: #718096;
+        }
+
+        .node-menu-btn:hover {
+            background: #f7fafc;
+            color: #2d3748;
+        }
+
+        .node-notes {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-top: 0.75rem;
+            font-style: italic;
+        }
+
+        .node-metadata {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+            font-size: 0.7rem;
+            color: #a0aec0;
+        }
+
+        .connection-line {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .connection-line line {
+            stroke: #a0aec0;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+        }
+
+        .connection-line.solid line {
+            stroke-dasharray: none;
+            stroke-width: 3;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h3 {
+            margin: 0 0 1.5rem 0;
+            color: #2d3748;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4299e1;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: #2d3748;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid #48bb78;
+            z-index: 3000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .analytics-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .analytics-card h4 {
+            margin: 0 0 0.5rem 0;
+            color: #2d3748;
+            font-size: 0.8rem;
+        }
+
+        .analytics-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #4299e1;
+        }
+
+        .connection-mode {
+            background: #48bb78 !important;
+        }
+
+        .connection-mode:hover {
+            background: #38a169 !important;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 40vh;
+            }
+            
+            .toolbar-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info">
+                    <div class="avatar" id="userAvatar">JS</div>
+                    <div class="user-details">
+                        <h3 id="userName">John Smith</h3>
+                        <p id="userEmail">john.smith@university.edu</p>
+                    </div>
+                </div>
+                
+                <div class="map-info">
+                    <h4 id="mapTitle">Advanced Biology Concepts</h4>
+                    <div class="map-stats">
+                        <div>Nodes: <span id="nodeCount">0</span></div>
+                        <div>Connections: <span id="connectionCount">0</span></div>
+                        <div>Created: <span id="createdDate">Today</span></div>
+                        <div>Modified: <span id="modifiedDate">Just now</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-content">
+                <!-- Tools Section -->
+                <div class="section">
+                    <h3>🛠️ Tools</h3>
+                    <div class="toolbar-grid">
+                        <button class="btn btn-primary" onclick="addNode()">
+                            ➕ Add Node
+                        </button>
+                        <button class="btn btn-secondary" id="connectBtn" onclick="toggleConnectionMode()">
+                            🔗 Connect
+                        </button>
+                        <button class="btn btn-secondary" onclick="autoLayout()">
+                            📐 Auto Layout
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportMap()">
+                            📤 Export
+                        </button>
+                        <button class="btn btn-success" onclick="saveMap()">
+                            💾 Save
+                        </button>
+                        <button class="btn btn-secondary" onclick="shareMap()">
+                            👥 Share
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Templates Section -->
+                <div class="section">
+                    <h3>📋 Templates</h3>
+                    <div class="templates-grid">
+                        <div class="template-card" onclick="loadTemplate('mindmap')">
+                            <h4>Mind Map</h4>
+                            <p>Central topic with branching ideas</p>
+                        </div>
+                        <div class="template-card" onclick="loadTemplate('flowchart')">
+                            <h4>Flow Chart</h4>
+                            <p>Process flow with decision points</p>
+                        </div>
+                        <div class="template-card" onclick="loadTemplate('hierarchy')">
+                            <h4>Hierarchy</h4>
+                            <p>Organizational structure layout</p>
+                        </div>
+                        <div class="template-card" onclick="loadTemplate('network')">
+                            <h4>Network</h4>
+                            <p>Interconnected concept network</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collaborators Section -->
+                <div class="section">
+                    <h3>👥 Collaborators</h3>
+                    <div class="collaborators" id="collaboratorsList">
+                        <div class="collaborator">
+                            <div class="collaborator-avatar">AM</div>
+                            <div class="collaborator-info">
+                                <h5>Alice Miller</h5>
+                                <p>Editing now</p>
+                            </div>
+                            <div class="status-indicator"></div>
+                        </div>
+                        <div class="collaborator">
+                            <div class="collaborator-avatar">BJ</div>
+                            <div class="collaborator-info">
+                                <h5>Bob Johnson</h5>
+                                <p>Viewed 2 min ago</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="inviteCollaborator()" style="margin-top: 1rem; width: 100%;">
+                        ➕ Invite Collaborator
+                    </button>
+                </div>
+
+                <!-- Analytics Section -->
+                <div class="section">
+                    <h3>📊 Analytics</h3>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <h4>Views Today</h4>
+                            <div class="analytics-value" id="viewsToday">24</div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4>Edits</h4>
+                            <div class="analytics-value" id="totalEdits">156</div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4>Comments</h4>
+                            <div class="analytics-value" id="totalComments">8</div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4>Shares</h4>
+                            <div class="analytics-value" id="totalShares">12</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>🧠 Advanced Concept Map Builder</h1>
+                <div class="header-actions">
+                    <div class="save-status">
+                        <span id="saveIcon">✅</span>
+                        <span id="saveText">All changes saved</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="showVersionHistory()">
+                        📜 History
+                    </button>
+                    <button class="btn btn-danger" onclick="clearMap()">
+                        🗑️ Clear
+                    </button>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <svg class="connection-line" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;">
+                </svg>
+                <div class="canvas" id="canvas"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Node Modal -->
+    <div class="modal" id="nodeModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Add New Concept</h3>
+            <form id="nodeForm">
+                <div class="form-group">
+                    <label for="nodeTitle">Concept Title</label>
+                    <input type="text" id="nodeTitle" placeholder="Enter concept name..." required>
+                </div>
+                <div class="form-group">
+                    <label for="nodeNotes">Description</label>
+                    <textarea id="nodeNotes" rows="3" placeholder="Add details, explanations, or links..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="nodeCategory">Category</label>
+                    <select id="nodeCategory">
+                        <option value="concept">Concept</option>
+                        <option value="process">Process</option>
+                        <option value="fact">Fact</option>
+                        <option value="question">Question</option>
+                        <option value="resource">Resource</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nodePriority">Priority</label>
+                    <select id="nodePriority">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Choose Color</label>
+                    <div class="color-picker">
+                        <div class="color-option selected" style="background: #4299e1;" data-color="#4299e1"></div>
+                        <div class="color-option" style="background: #48bb78;" data-color="#48bb78"></div>
+                        <div class="color-option" style="background: #ed8936;" data-color="#ed8936"></div>
+                        <div class="color-option" style="background: #e53e3e;" data-color="#e53e3e"></div>
+                        <div class="color-option" style="background: #9f7aea;" data-color="#9f7aea"></div>
+                        <div class="color-option" style="background: #38b2ac;" data-color="#38b2ac"></div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Concept</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content">
+            <h3>Share Concept Map</h3>
+            <div class="form-group">
+                <label for="shareEmail">Invite by Email</label>
+                <input type="email" id="shareEmail" placeholder="colleague@university.edu">
+            </div>
+            <div class="form-group">
+                <label for="sharePermission">Permission Level</label>
+                <select id="sharePermission">
+                    <option value="view">View Only</option>
+                    <option value="comment">Can Comment</option>
+                    <option value="edit">Can Edit</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Share Link</label>
+                <input type="text" id="shareLink" value="https://conceptmaps.edu/map/abc123" readonly>
+                <button class="btn btn-secondary" onclick="copyShareLink()" style="margin-top: 0.5rem;">
+                    📋 Copy Link
+                </button>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeShareModal()">Close</button>
+                <button type="button" class="btn btn-primary" onclick="sendInvite()">Send Invite</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        let nodes = [];
+        let connections = [];
+        let nodeCounter = 0;
+        let isConnectionMode = false;
+        let selectedNodes = [];
+        let currentEditingNode = null;
+        let mapData = {
+            id: 'map_' + Date.now(),
+            title: 'Advanced Biology Concepts',
+            created: new Date(),
+            modified: new Date(),
+            owner: 'john.smith@university.edu'
+        };
+
+        // Simulated Backend API
+        class ConceptMapAPI {
+            constructor() {
+                this.baseUrl = 'https://api.conceptmaps.edu/v1';
+                this.authToken = 'demo_token_' + Math.random().toString(36).substr(2, 9);
+                this.userId = 'user_123';
+            }
+
+            async saveMap(mapData) {
+                // Simulate API call
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        console.log('Saving map to backend:', mapData);
+                        localStorage.setItem('conceptMap_' + mapData.id, JSON.stringify(mapData));
+                        resolve({ success: true, id: mapData.id, timestamp: new Date() });
+                    }, 500);
+                });
+            }
+
+            async loadMap(mapId) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        const saved = localStorage.getItem('conceptMap_' + mapId);
+                        resolve(saved ? JSON.parse(saved) : null);
+                    }, 300);
+                });
+            }
+
+            async shareMap(mapId, email, permission) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        console.log(`Sharing map ${mapId} with ${email} (${permission})`);
+                        resolve({ success: true, shareId: 'share_' + Math.random().toString(36).substr(2, 9) });
+                    }, 400);
+                });
+            }
+
+            async getAnalytics(mapId) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve({
+                            views: Math.floor(Math.random() * 100) + 20,
+                            edits: Math.floor(Math.random() * 200) + 50,
+                            comments: Math.floor(Math.random() * 20) + 5,
+                            shares: Math.floor(Math.random() * 30) + 10
+                        });
+                    }, 200);
+                });
+            }
+
+            async getCollaborators(mapId) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve([
+                            { id: 'user_456', name: 'Alice Miller', email: 'alice@university.edu', status: 'online', lastSeen: new Date() },
+                            { id: 'user_789', name: 'Bob Johnson', email: 'bob@university.edu', status: 'offline', lastSeen: new Date(Date.now() - 120000) }
+                        ]);
+                    }, 300);
+                });
+            }
+        }
+
+        const api = new ConceptMapAPI();
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            loadAnalytics();
+            createSampleNodes();
+            updateStats();
+            
+            // Auto-save every 30 seconds
+            setInterval(autoSave, 30000);
+            
+            // Simulate real-time updates
+            setInterval(simulateCollaboratorActivity, 10000);
+        });
+
+        function setupEventListeners() {
+            // Color picker
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+
+            // Form submission
+            document.getElementById('nodeForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveNode();
+            });
+
+            // Canvas panning
+            setupCanvasPanning();
+        }
+
+        function setupCanvasPanning() {
+            const canvas = document.getElementById('canvas');
+            let isPanning = false;
+            let panStart = { x: 0, y: 0 };
+            let panOffset = { x: 0, y: 0 };
+
+            canvas.addEventListener('mousedown', function(e) {
+                if (e.target === canvas) {
+                    isPanning = true;
+                    panStart = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y };
+                    canvas.classList.add('dragging');
+                }
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (isPanning) {
+                    panOffset.x = e.clientX - panStart.x;
+                    panOffset.y = e.clientY - panStart.y;
+                    canvas.style.transform = `translate(${panOffset.x}px, ${panOffset.y}px)`;
+                }
+            });
+
+            document.addEventListener('mouseup', function() {
+                isPanning = false;
+                canvas.classList.remove('dragging');
+            });
+        }
+
+        function createSampleNodes() {
+            const samples = [
+                { 
+                    title: "Cell Structure", 
+                    notes: "Basic unit of life with membrane, cytoplasm, and nucleus", 
+                    color: "#4299e1", 
+                    category: "concept",
+                    priority: "high",
+                    x: 400, 
+                    y: 200 
+                },
+                { 
+                    title: "Mitochondria", 
+                    notes: "Powerhouse of the cell - produces ATP through cellular respiration", 
+                    color: "#48bb78", 
+                    category: "concept",
+                    priority: "medium",
+                    x: 200, 
+                    y: 350 
+                },
+                { 
+                    title: "DNA Replication", 
+                    notes: "Process of copying DNA before cell division", 
+                    color: "#ed8936", 
+                    category: "process",
+                    priority: "high",
+                    x: 600, 
+                    y: 350 
+                },
+                { 
+                    title: "Photosynthesis", 
+                    notes: "How plants convert sunlight into chemical energy", 
+                    color: "#48bb78", 
+                    category: "process",
+                    priority: "critical",
+                    x: 400, 
+                    y: 500 
+                }
+            ];
+
+            samples.forEach(sample => {
+                createNodeElement(sample.title, sample.notes, sample.color, sample.category, sample.priority, sample.x, sample.y);
+            });
+
+            // Create connections
+            setTimeout(() => {
+                if (nodes.length >= 4) {
+                    createConnection(nodes[0], nodes[1]);
+                    createConnection(nodes[0], nodes[2]);
+                    createConnection(nodes[0], nodes[3]);
+                }
+            }, 100);
+        }
+
+        function addNode() {
+            currentEditingNode = null;
+            document.getElementById('modalTitle').textContent = 'Add New Concept';
+            document.getElementById('nodeTitle').value = '';
+            document.getElementById('nodeNotes').value = '';
+            document.getElementById('nodeCategory').value = 'concept';
+            document.getElementById('nodePriority').value = 'medium';
+            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+            document.querySelector('.color-option').classList.add('selected');
+            document.getElementById('nodeModal').classList.add('show');
+            document.getElementById('nodeTitle').focus();
+        }
+
+        function editNode(node) {
+            currentEditingNode = node;
+            document.getElementById('modalTitle').textContent = 'Edit Concept';
+            document.getElementById('nodeTitle').value = node.title;
+            document.getElementById('nodeNotes').value = node.notes || '';
+            document.getElementById('nodeCategory').value = node.category || 'concept';
+            document.getElementById('nodePriority').value = node.priority || 'medium';
+            
+            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+            const colorOption = document.querySelector(`[data-color="${node.color}"]`);
+            if (colorOption) colorOption.classList.add('selected');
+            
+            document.getElementById('nodeModal').classList.add('show');
+            document.getElementById('nodeTitle').focus();
+        }
+
+        function saveNode() {
+            const title = document.getElementById('nodeTitle').value.trim();
+            const notes = document.getElementById('nodeNotes').value.trim();
+            const category = document.getElementById('nodeCategory').value;
+            const priority = document.getElementById('nodePriority').value;
+            const selectedColor = document.querySelector('.color-option.selected');
+            const color = selectedColor ? selectedColor.dataset.color : '#4299e1';
+
+            if (!title) return;
+
+            if (currentEditingNode) {
+                currentEditingNode.title = title;
+                currentEditingNode.notes = notes;
+                currentEditingNode.category = category;
+                currentEditingNode.priority = priority;
+                currentEditingNode.color = color;
+                currentEditingNode.modified = new Date();
+                updateNodeElement(currentEditingNode);
+            } else {
+                const x = Math.random() * (window.innerWidth - 400) + 200;
+                const y = Math.random() * (window.innerHeight - 400) + 200;
+                createNodeElement(title, notes, color, category, priority, x, y);
+            }
+
+            closeModal();
+            updateStats();
+            markUnsaved();
+        }
+
+        function createNodeElement(title, notes, color, category, priority, x, y) {
+            const node = {
+                id: ++nodeCounter,
+                title,
+                notes,
+                color,
+                category: category || 'concept',
+                priority: priority || 'medium',
+                x,
+                y,
+                created: new Date(),
+                modified: new Date(),
+                author: 'John Smith',
+                element: null
+            };
+
+            const nodeEl = document.createElement('div');
+            nodeEl.className = 'node';
+            nodeEl.style.left = x + 'px';
+            nodeEl.style.top = y + 'px';
+            nodeEl.style.borderColor = color;
+            
+            const priorityIcon = {
+                'low': '🔵',
+                'medium': '🟡',
+                'high': '🟠',
+                'critical': '🔴'
+            };
+
+            const categoryIcon = {
+                'concept': '💡',
+                'process': '⚙️',
+                'fact': '📋',
+                'question': '❓',
+                'resource': '📚'
+            };
+
+            nodeEl.innerHTML = `
+                <div class="node-header">
+                    <div class="node-content">${title}</div>
+                    <div class="node-menu">
+                        <button class="node-menu-btn" onclick="editNode(nodes[${nodes.length}])" title="Edit">✏️</button>
+                        <button class="node-menu-btn" onclick="deleteNode(nodes[${nodes.length}])" title="Delete">🗑️</button>
+                    </div>
+                </div>
+                ${notes ? `<div class="node-notes">${notes}</div>` : ''}
+                <div class="node-metadata">
+                    <span>${categoryIcon[category]} ${priorityIcon[priority]}</span>
+                    <span>${node.author}</span>
+                </div>
+            `;
+
+            setupNodeInteractions(nodeEl, node);
+            
+            node.element = nodeEl;
+            nodes.push(node);
+            document.getElementById('canvas').appendChild(nodeEl);
+        }
+
+        function setupNodeInteractions(nodeEl, node) {
+            let isDragging = false;
+            let dragStart = { x: 0, y: 0 };
+
+            nodeEl.addEventListener('mousedown', function(e) {
+                if (e.target.classList.contains('node-menu-btn')) return;
+                
+                if (isConnectionMode) {
+                    handleNodeClick(node);
+                    return;
+                }
+                
+                isDragging = true;
+                dragStart = { x: e.clientX - node.x, y: e.clientY - node.y };
+                nodeEl.style.zIndex = '100';
+                nodeEl.classList.add('editing');
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging) {
+                    node.x = e.clientX - dragStart.x;
+                    node.y = e.clientY - dragStart.y;
+                    nodeEl.style.left = node.x + 'px';
+                    nodeEl.style.top = node.y + 'px';
+                    updateConnections();
+                    markUnsaved();
+                }
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    nodeEl.style.zIndex = '10';
+                    nodeEl.classList.remove('editing');
+                    node.modified = new Date();
+                }
+            });
+
+            nodeEl.addEventListener('dblclick', function() {
+                if (!isConnectionMode) {
+                    editNode(node);
+                }
+            });
+        }
+
+        function updateNodeElement(node) {
+            const priorityIcon = {
+                'low': '🔵',
+                'medium': '🟡',
+                'high': '🟠',
+                'critical': '🔴'
+            };
+
+            const categoryIcon = {
+                'concept': '💡',
+                'process': '⚙️',
+                'fact': '📋',
+                'question': '❓',
+                'resource': '📚'
+            };
+
+            node.element.style.borderColor = node.color;
+            node.element.innerHTML = `
+                <div class="node-header">
+                    <div class="node-content">${node.title}</div>
+                    <div class="node-menu">
+                        <button class="node-menu-btn" onclick="editNode(nodes[${nodes.indexOf(node)}])" title="Edit">✏️</button>
+                        <button class="node-menu-btn" onclick="deleteNode(nodes[${nodes.indexOf(node)}])" title="Delete">🗑️</button>
+                    </div>
+                </div>
+                ${node.notes ? `<div class="node-notes">${node.notes}</div>` : ''}
+                <div class="node-metadata">
+                    <span>${categoryIcon[node.category]} ${priorityIcon[node.priority]}</span>
+                    <span>${node.author}</span>
+                </div>
+            `;
+        }
+
+        function deleteNode(node) {
+            if (confirm('Are you sure you want to delete this concept?')) {
+                // Remove connections
+                connections = connections.filter(conn => {
+                    if (conn.node1 === node || conn.node2 === node) {
+                        conn.element.remove();
+                        return false;
+                    }
+                    return true;
+                });
+                
+                // Remove node
+                node.element.remove();
+                nodes = nodes.filter(n => n !== node);
+                
+                updateStats();
+                markUnsaved();
+            }
+        }
+
+        function toggleConnectionMode() {
+            isConnectionMode = !isConnectionMode;
+            const btn = document.getElementById('connectBtn');
+            
+            if (isConnectionMode) {
+                btn.textContent = '✅ Click Nodes';
+                btn.classList.add('connection-mode');
+                selectedNodes = [];
+            } else {
+                btn.textContent = '🔗 Connect';
+                btn.classList.remove('connection-mode');
+                selectedNodes = [];
+                nodes.forEach(node => node.element.classList.remove('selected'));
+            }
+        }
+
+        function handleNodeClick(node) {
+            if (!isConnectionMode) return;
+
+            if (selectedNodes.includes(node)) {
+                selectedNodes = selectedNodes.filter(n => n !== node);
+                node.element.classList.remove('selected');
+            } else if (selectedNodes.length < 2) {
+                selectedNodes.push(node);
+                node.element.classList.add('selected');
+                
+                if (selectedNodes.length === 2) {
+                    createConnection(selectedNodes[0], selectedNodes[1]);
+                    selectedNodes.forEach(n => n.element.classList.remove('selected'));
+                    selectedNodes = [];
+                }
+            }
+        }
+
+        function createConnection(node1, node2) {
+            const exists = connections.some(conn => 
+                (conn.node1 === node1 && conn.node2 === node2) ||
+                (conn.node1 === node2 && conn.node2 === node1)
+            );
+            
+            if (exists) return;
+
+            const connection = {
+                id: Date.now(),
+                node1,
+                node2,
+                created: new Date(),
+                element: null
+            };
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.classList.add('connection-line');
+            
+            const svg = document.querySelector('svg');
+            svg.appendChild(line);
+            
+            connection.element = line;
+            connections.push(connection);
+            updateConnections();
+            updateStats();
+            markUnsaved();
+        }
+
+        function updateConnections() {
+            connections.forEach(conn => {
+                const x1 = conn.node1.x + conn.node1.element.offsetWidth / 2;
+                const y1 = conn.node1.y + conn.node1.element.offsetHeight / 2;
+                const x2 = conn.node2.x + conn.node2.element.offsetWidth / 2;
+                const y2 = conn.node2.y + conn.node2.element.offsetHeight / 2;
+                
+                conn.element.setAttribute('x1', x1);
+                conn.element.setAttribute('y1', y1);
+                conn.element.setAttribute('x2', x2);
+                conn.element.setAttribute('y2', y2);
+            });
+        }
+
+        function autoLayout() {
+            if (nodes.length === 0) return;
+            
+            showNotification('Applying automatic layout...', 'info');
+            
+            // Simple force-directed layout
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const radius = Math.min(centerX, centerY) * 0.6;
+            
+            nodes.forEach((node, index) => {
+                const angle = (index / nodes.length) * 2 * Math.PI;
+                const targetX = centerX + Math.cos(angle) * radius - 100;
+                const targetY = centerY + Math.sin(angle) * radius - 100;
+                
+                // Animate to new position
+                animateNodeToPosition(node, targetX, targetY);
+            });
+            
+            setTimeout(() => {
+                updateConnections();
+                markUnsaved();
+            }, 1000);
+        }
+
+        function animateNodeToPosition(node, targetX, targetY) {
+            const startX = node.x;
+            const startY = node.y;
+            const duration = 1000;
+            const startTime = Date.now();
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+                
+                node.x = startX + (targetX - startX) * easeProgress;
+                node.y = startY + (targetY - startY) * easeProgress;
+                
+                node.element.style.left = node.x + 'px';
+                node.element.style.top = node.y + 'px';
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    updateConnections();
+                }
+            }
+            
+            animate();
+        }
+
+        function loadTemplate(templateType) {
+            if (confirm('This will replace your current map. Continue?')) {
+                clearMap(false);
+                
+                const templates = {
+                    mindmap: [
+                        { title: "Central Topic", notes: "Main subject or theme", color: "#4299e1", category: "concept", priority: "critical", x: 400, y: 300 },
+                        { title: "Subtopic 1", notes: "First main branch", color: "#48bb78", category: "concept", priority: "high", x: 200, y: 200 },
+                        { title: "Subtopic 2", notes: "Second main branch", color: "#ed8936", category: "concept", priority: "high", x: 600, y: 200 },
+                        { title: "Detail A", notes: "Supporting information", color: "#48bb78", category: "fact", priority: "medium", x: 100, y: 100 },
+                        { title: "Detail B", notes: "Additional details", color: "#ed8936", category: "fact", priority: "medium", x: 700, y: 100 }
+                    ],
+                    flowchart: [
+                        { title: "Start", notes: "Beginning of process", color: "#48bb78", category: "process", priority: "high", x: 400, y: 100 },
+                        { title: "Decision Point", notes: "Choose path", color: "#ed8936", category: "question", priority: "high", x: 400, y: 250 },
+                        { title: "Process A", notes: "First option", color: "#4299e1", category: "process", priority: "medium", x: 250, y: 400 },
+                        { title: "Process B", notes: "Second option", color: "#9f7aea", category: "process", priority: "medium", x: 550, y: 400 },
+                        { title: "End", notes: "Final result", color: "#e53e3e", category: "process", priority: "high", x: 400, y: 550 }
+                    ],
+                    hierarchy: [
+                        { title: "Organization", notes: "Top level", color: "#4299e1", category: "concept", priority: "critical", x: 400, y: 100 },
+                        { title: "Department A", notes: "First division", color: "#48bb78", category: "concept", priority: "high", x: 200, y: 250 },
+                        { title: "Department B", notes: "Second division", color: "#ed8936", category: "concept", priority: "high", x: 600, y: 250 },
+                        { title: "Team 1", notes: "Sub-unit", color: "#48bb78", category: "concept", priority: "medium", x: 100, y: 400 },
+                        { title: "Team 2", notes: "Sub-unit", color: "#48bb78", category: "concept", priority: "medium", x: 300, y: 400 }
+                    ],
+                    network: [
+                        { title: "Node A", notes: "Connected element", color: "#4299e1", category: "concept", priority: "high", x: 300, y: 200 },
+                        { title: "Node B", notes: "Connected element", color: "#48bb78", category: "concept", priority: "high", x: 500, y: 200 },
+                        { title: "Node C", notes: "Connected element", color: "#ed8936", category: "concept", priority: "high", x: 400, y: 350 },
+                        { title: "Node D", notes: "Connected element", color: "#9f7aea", category: "concept", priority: "medium", x: 200, y: 350 },
+                        { title: "Node E", notes: "Connected element", color: "#38b2ac", category: "concept", priority: "medium", x: 600, y: 350 }
+                    ]
+                };
+                
+                const template = templates[templateType];
+                if (template) {
+                    template.forEach(nodeData => {
+                        createNodeElement(nodeData.title, nodeData.notes, nodeData.color, nodeData.category, nodeData.priority, nodeData.x, nodeData.y);
+                    });
+                    
+                    // Create template-specific connections
+                    setTimeout(() => {
+                        if (templateType === 'mindmap') {
+                            createConnection(nodes[0], nodes[1]);
+                            createConnection(nodes[0], nodes[2]);
+                            createConnection(nodes[1], nodes[3]);
+                            createConnection(nodes[2], nodes[4]);
+                        } else if (templateType === 'flowchart') {
+                            createConnection(nodes[0], nodes[1]);
+                            createConnection(nodes[1], nodes[2]);
+                            createConnection(nodes[1], nodes[3]);
+                            createConnection(nodes[2], nodes[4]);
+                            createConnection(nodes[3], nodes[4]);
+                        } else if (templateType === 'hierarchy') {
+                            createConnection(nodes[0], nodes[1]);
+                            createConnection(nodes[0], nodes[2]);
+                            createConnection(nodes[1], nodes[3]);
+                            createConnection(nodes[1], nodes[4]);
+                        } else if (templateType === 'network') {
+                            createConnection(nodes[0], nodes[1]);
+                            createConnection(nodes[1], nodes[2]);
+                            createConnection(nodes[2], nodes[3]);
+                            createConnection(nodes[3], nodes[0]);
+                            createConnection(nodes[1], nodes[4]);
+                            createConnection(nodes[2], nodes[4]);
+                        }
+                        updateStats();
+                    }, 100);
+                    
+                    showNotification(`${templateType.charAt(0).toUpperCase() + templateType.slice(1)} template loaded!`, 'success');
+                }
+            }
+        }
+
+        async function saveMap() {
+            setSaveStatus('saving', 'Saving...');
+            
+            const mapToSave = {
+                ...mapData,
+                nodes: nodes.map(n => ({
+                    id: n.id,
+                    title: n.title,
+                    notes: n.notes,
+                    color: n.color,
+                    category: n.category,
+                    priority: n.priority,
+                    x: n.x,
+                    y: n.y,
+                    created: n.created,
+                    modified: n.modified,
+                    author: n.author
+                })),
+                connections: connections.map(c => ({
+                    id: c.id,
+                    node1: c.node1.id,
+                    node2: c.node2.id,
+                    created: c.created
+                })),
+                modified: new Date()
+            };
+            
+            try {
+                const result = await api.saveMap(mapToSave);
+                if (result.success) {
+                    setSaveStatus('saved', 'All changes saved');
+                    showNotification('Map saved successfully!', 'success');
+                }
+            } catch (error) {
+                setSaveStatus('error', 'Save failed');
+                showNotification('Failed to save map. Please try again.', 'error');
+            }
+        }
+
+        async function autoSave() {
+            if (document.getElementById('saveText').textContent !== 'All changes saved') {
+                await saveMap();
+            }
+        }
+
+        function shareMap() {
+            document.getElementById('shareModal').classList.add('show');
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.remove('show');
+        }
+
+        async function sendInvite() {
+            const email = document.getElementById('shareEmail').value.trim();
+            const permission = document.getElementById('sharePermission').value;
+            
+            if (!email) {
+                showNotification('Please enter an email address', 'error');
+                return;
+            }
+            
+            try {
+                const result = await api.shareMap(mapData.id, email, permission);
+                if (result.success) {
+                    showNotification(`Invitation sent to ${email}!`, 'success');
+                    document.getElementById('shareEmail').value = '';
+                    closeShareModal();
+                }
+            } catch (error) {
+                showNotification('Failed to send invitation', 'error');
+            }
+        }
+
+        function copyShareLink() {
+            const link = document.getElementById('shareLink');
+            link.select();
+            document.execCommand('copy');
+            showNotification('Link copied to clipboard!', 'success');
+        }
+
+        function inviteCollaborator() {
+            shareMap();
+        }
+
+        function exportMap() {
+            const exportData = {
+                title: mapData.title,
+                created: mapData.created,
+                nodes: nodes.map(n => ({
+                    title: n.title,
+                    notes: n.notes,
+                    color: n.color,
+                    category: n.category,
+                    priority: n.priority,
+                    x: n.x,
+                    y: n.y
+                })),
+                connections: connections.map(c => ({
+                    node1: nodes.indexOf(c.node1),
+                    node2: nodes.indexOf(c.node2)
+                }))
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${mapData.title.replace(/\s+/g, '_')}_concept_map.json`;
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            showNotification('Map exported successfully!', 'success');
+        }
+
+        function clearMap(confirm = true) {
+            if (!confirm || window.confirm('Are you sure you want to clear all concepts and connections?')) {
+                nodes.forEach(node => node.element.remove());
+                connections.forEach(conn => conn.element.remove());
+                nodes = [];
+                connections = [];
+                nodeCounter = 0;
+                updateStats();
+                markUnsaved();
+                
+                if (confirm) {
+                    showNotification('Map cleared', 'info');
+                }
+            }
+        }
+
+        function showVersionHistory() {
+            showNotification('Version history feature coming soon!', 'info');
+        }
+
+        function updateStats() {
+            document.getElementById('nodeCount').textContent = nodes.length;
+            document.getElementById('connectionCount').textContent = connections.length;
+            document.getElementById('modifiedDate').textContent = 'Just now';
+        }
+
+        async function loadAnalytics() {
+            try {
+                const analytics = await api.getAnalytics(mapData.id);
+                document.getElementById('viewsToday').textContent = analytics.views;
+                document.getElementById('totalEdits').textContent = analytics.edits;
+                document.getElementById('totalComments').textContent = analytics.comments;
+                document.getElementById('totalShares').textContent = analytics.shares;
+            } catch (error) {
+                console.error('Failed to load analytics:', error);
+            }
+        }
+
+        function simulateCollaboratorActivity() {
+            // Simulate real-time collaborator updates
+            const activities = [
+                'Viewing map',
+                'Editing nodes',
+                'Adding connections',
+                'Left comments'
+            ];
+            
+            const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+            console.log('Collaborator activity:', randomActivity);
+            
+            // Update analytics occasionally
+            if (Math.random() < 0.3) {
+                loadAnalytics();
+            }
+        }
+
+        function setSaveStatus(status, text) {
+            const icon = document.getElementById('saveIcon');
+            const textEl = document.getElementById('saveText');
+            
+            const statusConfig = {
+                saving: { icon: '⏳', color: '#ed8936' },
+                saved: { icon: '✅', color: '#48bb78' },
+                error: { icon: '❌', color: '#e53e3e' }
+            };
+            
+            const config = statusConfig[status];
+            icon.textContent = config.icon;
+            textEl.textContent = text;
+            textEl.style.color = config.color;
+        }
+
+        function markUnsaved() {
+            setSaveStatus('saving', 'Unsaved changes');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            const colors = {
+                success: '#48bb78',
+                error: '#e53e3e',
+                info: '#4299e1',
+                warning: '#ed8936'
+            };
+            
+            notification.style.borderLeftColor = colors[type];
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        function closeModal() {
+            document.getElementById('nodeModal').classList.remove('show');
+        }
+
+        // Close modals when clicking outside
+        document.getElementById('nodeModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        document.getElementById('shareModal').addEventListener('click', function(e) {
+            if (e.target === this) closeShareModal();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985c669a649ecf00',t:'MTc1ODk5MDc4Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
